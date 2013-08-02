@@ -65,7 +65,7 @@ class LuaEnvironment
 
 		// Thread Operations:
         int32 ExecuteScript(std::string scriptName, uint32 accessCode = 0);
-        int32 RunScriptProcess(uint32 accessCode = 0);
+        int32 RunScriptProcess(uint32 accessCode = 0, bool repeat = false);
         int32 StopScriptProcess(uint32 accessCode = 0);
         int32 TerminateThread(uint32 accessCode = 0);
 

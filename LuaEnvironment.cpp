@@ -14,12 +14,13 @@ LuaEnvironment::LuaEnvironment(std::string threadName, std::string scriptPath, b
 	m_SleepIntervalMilliSeconds = 1000;
     m_ThreadName = threadName;
     m_ScriptPath = scriptPath;
+    m_CurrentScriptRunning = "";
     m_pLua = NULL;
     m_ScriptState = STATE_IDLE;
     m_p_terminate_mutex = NULL;
     m_p_repeat_mutex = NULL;
     m_p_execute_mutex = NULL;
-    m_p_stop_mutex = NULL;
+    //m_p_stop_mutex = NULL;
     m_bThreadProcessActive = false;
 
     m_bTerminateThreadFlag = false;
@@ -29,12 +30,27 @@ LuaEnvironment::LuaEnvironment(std::string threadName, std::string scriptPath, b
 
     m_bInitialized = false;
 
+	m_p_terminate_mutex = new boost::mutex;
+	m_p_repeat_mutex = new boost::mutex;
+	m_p_execute_mutex = new boost::mutex;
+	m_p_stop_mutex = new boost::mutex;
+
     std::cout << "LuaEnvironment CONSTRUCTOR called!" << std::endl;
     return;
 }
 
 LuaEnvironment::~LuaEnvironment()
 {
+	if( m_pLua != NULL)
+		delete m_pLua;
+	//if( m_p_terminate_mutex != NULL)
+	//	delete m_p_terminate_mutex;
+	//if( m_p_repeat_mutex != NULL)
+	//	delete m_p_repeat_mutex;
+	//if( m_p_execute_mutex != NULL)
+	//	delete m_p_execute_mutex;
+	//if( m_p_stop_mutex != NULL)
+	//	delete m_p_stop_mutex;
     std::cout << "LuaEnvironment DESTRUCTOR called!" << std::endl;
 }
 
@@ -49,8 +65,10 @@ void LuaEnvironment::operator()(LuaThread * pMyLuaThread, std::string scriptName
     }
 
     m_pMyLuaThread = pMyLuaThread;
-    m_CurrentScriptRunning = m_ScriptPath + scriptName;
+    m_CurrentScriptRunning = m_ScriptPath + "/";
+	m_CurrentScriptRunning += scriptName;
     SetScriptAccessCode(0, accessCode);
+	std::cout << "LuaEnvironment set to execute script '" << m_CurrentScriptRunning.c_str() << "'" << std::endl;
 
     // Send back to owning LuaThread object instance our pointer:
     m_pMyLuaThread->Script_SetOwnedLuaEnvironment(this,m_MyScriptAccessCode);
@@ -90,11 +108,6 @@ int32 LuaEnvironment::InitializeLuaEnvironment()
     m_bExecuteScriptFlag = false;
     m_bStopScriptRunsFlag = false;
     m_bTerminateThreadProcess = false;
-
-    m_p_terminate_mutex = new boost::mutex();
-    m_p_repeat_mutex = new boost::mutex();
-    m_p_execute_mutex = new boost::mutex();
-    m_p_stop_mutex = new boost::mutex();
 
     if( m_pLua == NULL )
     {
@@ -159,11 +172,14 @@ int32 LuaEnvironment::ExecuteScript(std::string scriptName, uint32 accessCode)
     return 1;
 }
 
-int32 LuaEnvironment::RunScriptProcess(uint32 accessCode)
+int32 LuaEnvironment::RunScriptProcess(uint32 accessCode, bool repeat)
 {
     if( accessCode == m_MyScriptAccessCode )
     {
-        _SetExecuteScriptFlag();
+		if( repeat )
+			_SetRepeatScriptRunsFlag();
+		else
+			_SetExecuteScriptFlag();
     }
     else
         return 0;
@@ -256,22 +272,24 @@ void LuaEnvironment::_ThreadProcess()
         switch (m_ScriptState)
         {
             case STATE_IDLE:
-                std::cout << "LuaEnvironment::ThreadProcess(): Executing IDLE state" << std::endl;
+                std::cout << "LuaEnvironment::ThreadProcess(): (" << m_ThreadName.c_str() << ") Executing IDLE state" << std::endl;
                 _ClearRepeatScriptRunsFlag();
                 _ClearExecuteScriptFlag();
                 _ClearStopScriptRunsFlag();
                 break;
 
             case STATE_RUN:
-                std::cout << "LuaEnvironment::ThreadProcess(): Executing RUN state" << std::endl;
+                std::cout << "LuaEnvironment::ThreadProcess(): (" << m_ThreadName.c_str() << ") Executing RUN state" << std::endl;
                 _ClearExecuteScriptFlag();
-                std::cout << "LuaEnvironment::ThreadProcess(): EXECUTING Lua script..." << std::endl;
+                std::cout << "LuaEnvironment::ThreadProcess(): (" << m_ThreadName.c_str() << ") EXECUTING Lua script..." << std::endl;
                 m_pLua->executeCode(*scriptFileStream);		// Alternative:  m_pLua->executeCode(std::ifstream(m_CurrentScriptRunning.c_str()));
                 _Owner_ScriptCompleteNotify();
                 break;
 
             case STATE_REPEAT:
+                std::cout << "LuaEnvironment::ThreadProcess(): (" << m_ThreadName.c_str() << ") Executing REPEAT state" << std::endl;
                 std::cout << "LuaEnvironment::ThreadProcess(): Executing REPEAT state" << std::endl;
+                std::cout << "LuaEnvironment::ThreadProcess(): (" << m_ThreadName.c_str() << ") EXECUTING Lua script w/ REPEAT..." << std::endl;
                 std::cout << "LuaEnvironment::ThreadProcess(): EXECUTING Lua script w/ REPEAT..." << std::endl;
                 m_pLua->executeCode(*scriptFileStream);		// Alternative:  m_pLua->executeCode(std::ifstream(m_CurrentScriptRunning.c_str()));
                 _Owner_ScriptCompleteNotify();

@@ -43,13 +43,16 @@ class LuaEnvironment;
 class LuaThread
 {
     public:
-        LuaThread(std::string threadName, std::string scriptPath, std::string logFilePath, bool useThreading = false);
+        LuaThread(std::string threadName, std::string scriptPath, std::string logFilePath, bool useThreading = false, bool scriptRepeat = false);
         ~LuaThread();
 
         LuaEnvironment * GetLuaEnv();
 
         // Script Management:
         int32 ExecuteScript(std::string scriptName);
+		int32 ResumeScript();
+		int32 StopScript();
+		bool HasScriptExecutedOnce();
 
         // Script Management - Threading Enabled Use Only!
         int32 KillScript();		// Only used for threaded scripts
@@ -97,6 +100,7 @@ class LuaThread
         bool m_UseThreading;
         uint32 m_MyScriptAccessCode;
         bool m_bLogFileUnavailable;
+		bool m_scriptRepeat;
 
         boost::shared_ptr<LuaEnvironment> m_pLuaEnvironment;
         boost::shared_ptr<boost::thread> m_pThread;

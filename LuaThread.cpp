@@ -1,9 +1,10 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include "LuaThread.h"
 
-LuaThread::LuaThread(std::string threadName, std::string scriptPath, std::string logFilePath, bool useThreading)
+LuaThread::LuaThread(std::string threadName, std::string scriptPath, std::string logFilePath, bool useThreading, bool scriptRepeat)
 {
     m_ThreadName = threadName;
     m_ScriptPath = scriptPath;
@@ -11,6 +12,8 @@ LuaThread::LuaThread(std::string threadName, std::string scriptPath, std::string
     m_UseThreading = useThreading;
     m_pLogFile = NULL;
     m_bLogFileUnavailable = false;
+    m_MyScriptAccessCode = (rand() % 0xFFFF) + ((rand() % 0xFFFF) * 0x00010000);
+	m_scriptRepeat = scriptRepeat;
 
     // Create LuaEnvironment object directly in this thread only if NOT using threading:
     if( !(m_UseThreading) )
@@ -18,12 +21,11 @@ LuaThread::LuaThread(std::string threadName, std::string scriptPath, std::string
         m_pLuaEnvironment = boost::shared_ptr<LuaEnvironment>(new LuaEnvironment(m_ThreadName,m_ScriptPath,false));
         assert( m_pLuaEnvironment.get() != NULL );
 		m_pLuaEnvironment->SetThreadOwner(this);
-    }
 
-    // Initialize LuaEnvironment Object:
-    m_MyScriptAccessCode = 0x12345678;
-    m_pLuaEnvironment->SetScriptAccessCode(0,m_MyScriptAccessCode);
-    m_pLuaEnvironment->SetSleepInterval(5000);
+	    // Initialize LuaEnvironment Object:
+	    m_pLuaEnvironment->SetScriptAccessCode(0,m_MyScriptAccessCode);
+	    m_pLuaEnvironment->SetSleepInterval(5000);
+	}
 
     // Open log file and print initial message:
     std::string logFile = m_LogFilePath;
@@ -60,6 +62,7 @@ LuaThread::~LuaThread()
         _LogMessage("LuaThread: LOGGING SHUTTING DOWN");
         fputs( logFileLine.c_str(), m_pLogFile );
         fclose(m_pLogFile);
+		delete m_pLogFile;
     }
 }
 
@@ -74,6 +77,7 @@ int32 LuaThread::ExecuteScript(std::string scriptName)
         // 4. Access thread and make call to LuaEnvironment to initialize the lua interpreter environment
 
         LuaEnvironment tempLuaEnv(m_ThreadName,m_ScriptPath,true);
+		tempLuaEnv.SetSleepInterval(5000);
         m_pThread = boost::shared_ptr<boost::thread>(new boost::thread(tempLuaEnv, this, scriptName, m_MyScriptAccessCode));
 
         if( m_pThread == NULL )
@@ -82,8 +86,9 @@ int32 LuaThread::ExecuteScript(std::string scriptName)
         // Wait for newly created thread to take pointer to us, call
         while( m_pLuaEnvironment == NULL );
 
+		_LogMessage("LuaThread: SUCCESS - LuaEnvironment Thread called back with valid call pointer!");
 
-
+		m_pLuaEnvironment->RunScriptProcess(m_MyScriptAccessCode,m_scriptRepeat);
         // tempLuaEnv will destruct leaving the current scope of the "if( m_UseThreading ) {...}" block
     }
     else
@@ -97,9 +102,26 @@ int32 LuaThread::ExecuteScript(std::string scriptName)
     return 1;
 }
 
+int32 LuaThread::ResumeScript()
+{
+	return m_pLuaEnvironment->RunScriptProcess(m_MyScriptAccessCode,m_scriptRepeat);
+}
+
+int32 LuaThread::StopScript()
+{
+	return m_pLuaEnvironment->StopScriptProcess(m_MyScriptAccessCode);
+}
+
+bool LuaThread::HasScriptExecutedOnce()
+{
+	return m_bScriptExecutionComplete;
+}
+
 int32 LuaThread::KillScript()
 {
-    return 0;
+	m_pLuaEnvironment->KillThread();
+
+    return 1;
 }
 
 int32 LuaThread::PingScript()
@@ -199,8 +221,12 @@ int32 LuaThread::Script_LogMessage(std::string logMessage, uint32 accessCode)
 int32 LuaThread::Script_SetOwnedLuaEnvironment(LuaEnvironment * luaenv, uint32 accessCode)
 {
     if( luaenv == NULL )
+	{
+		_LogMessage("LuaThread: FATAL ERROR - LuaEnvironment callback pointer is NULL!");
         return 0;
+	}
 
+	_LogMessage("LuaThread: SUCCESS - LuaEnvironment callback pointer set!");
     m_pLuaEnvironment = boost::shared_ptr<LuaEnvironment>(luaenv);
     
     return 1;

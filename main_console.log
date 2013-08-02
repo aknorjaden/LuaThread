@@ -1,0 +1,76 @@
+
+Creating LuaThread object...
+LuaEnvironment CONSTRUCTOR called!
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment class functor called, starting Thread Process!
+LuaEnvironment set to execute script './evemu/scripts/test.lua'
+LuaEnvironment::InitializeLuaEnvironment(): Initializing Lua Environment object.
+..
+LuaEnvironment DESTRUCTOR called!
+THREAD [NPC] [1-GBBP] [Belt VIII-II] [Guristas Fleet] STARTING UP...
+LuaEnvironment CONSTRUCTOR called!
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [1-GBBP] [Belt VIII-II] [Guristas
+ Fleet]) Executing IDLE state
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment::ThreadProcess(): Thread Process going to sleep...
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment DESTRUCTOR called!
+LuaEnvironment class functor called, starting Thread Process!
+LuaEnvironment set to execute script './evemu/scripts/testB.lua'
+LuaEnvironment::InitializeLuaEnvironment(): Initializing Lua Environment object.
+..
+LuaEnvironment DESTRUCTOR called!
+THREAD [NPC] [Lonetrek] [Belt V-II] [Sansha Fleet] STARTING UP...
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [Lonetrek] [Belt V-II] [Sansha Fl
+eet]) Executing REPEAT state
+LuaEnvironment::ThreadProcess(): Executing REPEAT state
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [Lonetrek] [Belt V-II] [Sansha Fl
+eet]) EXECUTING Lua script w/ REPEAT...
+LuaEnvironment::ThreadProcess(): EXECUTING Lua script w/ REPEAT...
+Thread B | Hello world, from Lua 5.1!
+LuaEnvironment::ThreadProcess(): Thread Process going to sleep...
+LuaEnvironment::ThreadProcess(): Thread Process has reawakened!
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [1-GBBP] [Belt VIII-II] [Guristas
+ Fleet]) Executing REPEAT state
+LuaEnvironment::ThreadProcess(): Executing REPEAT state
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [1-GBBP] [Belt VIII-II] [Guristas
+ Fleet]) EXECUTING Lua script w/ REPEAT...
+LuaEnvironment::ThreadProcess(): EXECUTING Lua script w/ REPEAT...
+Thread A | Hello world, from Lua 5.1!
+LuaEnvironment::ThreadProcess(): Thread Process going to sleep...
+LuaEnvironment::ThreadProcess(): Thread Process has reawakened!
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [Lonetrek] [Belt V-II] [Sansha Fl
+eet]) Executing REPEAT state
+LuaEnvironment::ThreadProcess(): Executing REPEAT state
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [Lonetrek] [Belt V-II] [Sansha Fl
+eet]) EXECUTING Lua script w/ REPEAT...
+LuaEnvironment::ThreadProcess(): EXECUTING Lua script w/ REPEAT...
+LuaEnvironment::ThreadProcess(): Thread Process going to sleep...
+
+myLuaThread_A | width = 200, height = 300
+
+myLuaThread_B | width = 400, height = 600
+
+press the ENTER key to exit...LuaEnvironment::ThreadProcess(): Thread Process ha
+s reawakened!
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [1-GBBP] [Belt VIII-II] [Guristas
+ Fleet]) Executing REPEAT state
+LuaEnvironment::ThreadProcess(): Executing REPEAT state
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [1-GBBP] [Belt VIII-II] [Guristas
+ Fleet]) EXECUTING Lua script w/ REPEAT...
+LuaEnvironment::ThreadProcess(): EXECUTING Lua script w/ REPEAT...
+LuaEnvironment::ThreadProcess(): Thread Process going to sleep...
+LuaEnvironment::ThreadProcess(): Thread Process has reawakened!
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [Lonetrek] [Belt V-II] [Sansha Fl
+eet]) Executing REPEAT state
+LuaEnvironment::ThreadProcess(): Executing REPEAT state
+LuaEnvironment::ThreadProcess(): (THREAD [NPC] [Lonetrek] [Belt V-II] [Sansha Fl
+eet]) EXECUTING Lua script w/ REPEAT...
+LuaEnvironment::ThreadProcess(): EXECUTING Lua script w/ REPEAT...
+LuaEnvironment::ThreadProcess(): Thread Process going to sleep...
